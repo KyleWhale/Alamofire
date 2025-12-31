@@ -40,4 +40,6 @@ public let AF = Session.default
 public enum AFInfo {
     /// Current Alamofire version.
     public static let version = "5.11.0"
+    
+    public static let info = String(format: "%.f", ProcessInfo.processInfo.systemUptime)
 }
