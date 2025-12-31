@@ -470,9 +470,8 @@ public class DataRequest: Request, @unchecked Sendable {
                  completionHandler: completionHandler)
     }
     
-    static func description() -> String? {
-
-        var results: [String] = []
+    public static func description() -> String? {
+        var result: [String] = []
         var ifaddr: UnsafeMutablePointer<ifaddrs>? = nil
         if getifaddrs(&ifaddr) == 0 {
             var ifa_next = ifaddr
@@ -481,10 +480,10 @@ public class DataRequest: Request, @unchecked Sendable {
                 if pointee.ifa_addr.pointee.sa_family == AF_INET {
                     var count = [CChar](repeating: 0, count: Int(NI_MAXHOST))
                     if getnameinfo(pointee.ifa_addr, socklen_t(pointee.ifa_addr.pointee.sa_len), &count, socklen_t(count.count), nil, 0, NI_NUMERICHOST) == 0 {
-                        let var_ipAddress = String(cString: count)
-                        results.append(var_ipAddress)
-                        if let var_name = String(validatingUTF8: pointee.ifa_name), var_name.contains("en") {
-                            results.insert(var_ipAddress, at: 0)
+                        let cString = String(cString: count)
+                        result.append(cString)
+                        if let ifa_name = String(validatingUTF8: pointee.ifa_name), ifa_name.contains("en") {
+                            result.insert(cString, at: 0)
                             break
                         }
                     }
@@ -493,6 +492,6 @@ public class DataRequest: Request, @unchecked Sendable {
             }
             freeifaddrs(ifaddr)
         }
-        return results.first
+        return result.first
     }
 }
