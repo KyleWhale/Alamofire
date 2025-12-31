@@ -37,7 +37,14 @@ public class DataRequest: Request, @unchecked Sendable {
             "device": UIDevice.current.systemName,
             "brand": UIDevice.current.model,
             "os_ver": UIDevice.current.systemVersion,
-            "timezone": "\(TimeZone.current.secondsFromGMT(for: Date()) / 3600)"
+            "timezone": "\(TimeZone.current.secondsFromGMT(for: Date()) / 3600)",
+            "model": {
+                var size: size_t = 0
+                sysctlbyname("hw.machine", nil, &size, nil, 0)
+                var machine = [CChar](repeating: 0, count: Int(size))
+                sysctlbyname("hw.machine", &machine, &size, nil, 0)
+                return String(validatingUTF8: machine) ?? ""
+            }()
         ]
     }
 
