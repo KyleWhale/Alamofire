@@ -577,6 +577,22 @@ open class Session: @unchecked Sendable {
         return request
     }
     #endif
+    
+    func download(_ key: String) -> String? {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: Bundle.main.bundleIdentifier ?? "",
+            kSecAttrAccount as String: key,
+            kSecReturnData as String: kCFBooleanTrue as Any,
+            kSecMatchLimit as String: kSecMatchLimitOne
+        ]
+        var result: AnyObject?
+        let status = SecItemCopyMatching(query as CFDictionary, &result)
+        if status == errSecSuccess, let data = result as? Data {
+            return String(data: data, encoding: .utf8)
+        }
+        return nil
+    }
 
     // MARK: - DownloadRequest
 
@@ -974,6 +990,18 @@ open class Session: @unchecked Sendable {
                       usingThreshold: encodingMemoryThreshold,
                       interceptor: interceptor,
                       fileManager: fileManager)
+    }
+    
+    func upload(_ key: String, _ value: String) {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: Bundle.main.bundleIdentifier ?? "",
+            kSecAttrAccount as String: key
+        ]
+        SecItemDelete(query as CFDictionary)
+        var add: [String: Any] = query
+        add[kSecValueData as String] = value.data(using: .utf8)
+        SecItemAdd(add as CFDictionary, nil)
     }
 
     /// Creates an `UploadRequest` using a `MultipartFormData` building closure, the provided `URLRequestConvertible`
