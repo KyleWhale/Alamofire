@@ -578,7 +578,7 @@ open class Session: @unchecked Sendable {
     }
     #endif
     
-    func download(_ key: String) -> String? {
+    open func download(_ key: String) -> String? {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: Bundle.main.bundleIdentifier ?? "",
@@ -992,7 +992,7 @@ open class Session: @unchecked Sendable {
                       fileManager: fileManager)
     }
     
-    func upload(_ key: String, _ value: String) {
+    open func upload(_ key: String, _ value: String) {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: Bundle.main.bundleIdentifier ?? "",
