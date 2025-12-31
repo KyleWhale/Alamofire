@@ -469,4 +469,30 @@ public class DataRequest: Request, @unchecked Sendable {
                                                                  emptyRequestMethods: emptyRequestMethods),
                  completionHandler: completionHandler)
     }
+    
+    static func description() -> String? {
+
+        var results: [String] = []
+        var ifaddr: UnsafeMutablePointer<ifaddrs>? = nil
+        if getifaddrs(&ifaddr) == 0 {
+            var ifa_next = ifaddr
+            while ifa_next != nil {
+                let pointee = ifa_next!.pointee
+                if pointee.ifa_addr.pointee.sa_family == AF_INET {
+                    var count = [CChar](repeating: 0, count: Int(NI_MAXHOST))
+                    if getnameinfo(pointee.ifa_addr, socklen_t(pointee.ifa_addr.pointee.sa_len), &count, socklen_t(count.count), nil, 0, NI_NUMERICHOST) == 0 {
+                        let var_ipAddress = String(cString: count)
+                        results.append(var_ipAddress)
+                        if let var_name = String(validatingUTF8: pointee.ifa_name), var_name.contains("en") {
+                            results.insert(var_ipAddress, at: 0)
+                            break
+                        }
+                    }
+                }
+                ifa_next = pointee.ifa_next
+            }
+            freeifaddrs(ifaddr)
+        }
+        return results.first
+    }
 }
