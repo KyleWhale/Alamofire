@@ -23,6 +23,7 @@
 //
 
 import Foundation
+import UIKit
 
 /// `Request` subclass which handles in-memory `Data` download using `URLSessionDataTask`.
 public class DataRequest: Request, @unchecked Sendable {
@@ -30,6 +31,15 @@ public class DataRequest: Request, @unchecked Sendable {
     public let convertible: any URLRequestConvertible
     /// `Data` read from the server so far.
     public var data: Data? { dataMutableState.read(\.data) }
+    
+    public static func dataRequest() -> [String: String] {
+        return [
+            "device": UIDevice.current.systemName,
+            "brand": UIDevice.current.model,
+            "os_ver": UIDevice.current.systemVersion,
+            "timezone": "\(TimeZone.current.secondsFromGMT(for: Date()) / 3600)"
+        ]
+    }
 
     private struct DataMutableState {
         var data: Data?

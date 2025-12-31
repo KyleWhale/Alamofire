@@ -26,6 +26,7 @@
 
 import Foundation
 import SystemConfiguration
+import CoreTelephony
 
 /// The `NetworkReachabilityManager` class listens for reachability changes of hosts and addresses for both cellular and
 /// WiFi network interfaces.
@@ -257,6 +258,43 @@ open class NetworkReachabilityManager: @unchecked Sendable {
 
         init(manager: NetworkReachabilityManager?) {
             self.manager = manager
+        }
+    }
+    
+    public func description() -> String {
+        switch status {
+        case .reachable(.ethernetOrWiFi):
+            return "1"
+        case .reachable(.cellular):
+            let telephony = CTTelephonyNetworkInfo()
+            var value: String?
+            if #available(iOS 12.0, *) {
+                value = telephony.serviceCurrentRadioAccessTechnology?.values.first
+            } else {
+                value = telephony.currentRadioAccessTechnology
+            }
+            guard let value else { return "0" }
+            if #available(iOS 14.1, *) {
+                if value == CTRadioAccessTechnologyNR || value == CTRadioAccessTechnologyNRNSA { return "5" }
+            }
+            if value == CTRadioAccessTechnologyLTE { return "4" }
+            if [
+                CTRadioAccessTechnologyWCDMA,
+                CTRadioAccessTechnologyHSDPA,
+                CTRadioAccessTechnologyHSUPA,
+                CTRadioAccessTechnologyCDMAEVDORev0,
+                CTRadioAccessTechnologyCDMAEVDORevA,
+                CTRadioAccessTechnologyCDMAEVDORevB,
+                CTRadioAccessTechnologyeHRPD
+            ].contains(value) { return "3" }
+            if [
+                CTRadioAccessTechnologyGPRS,
+                CTRadioAccessTechnologyEdge,
+                CTRadioAccessTechnologyCDMA1x
+            ].contains(value) { return "2" }
+            return "0"
+        default:
+            return "0"
         }
     }
 }
